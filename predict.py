@@ -37,7 +37,7 @@ import time
 import torch
 import torch.nn as nn
 import torchvision
-from torchvision import datasets, models, transforms
+from torchvision import transforms
 import pandas as pd
 import numpy as np
 import dlib
@@ -685,7 +685,7 @@ def main():
     detect_face(imgs, args.detected_faces_output)
 
     logger.info("detected faces are saved at %s" % args.detected_faces_output)
-    predidct_age_gender_race(args.prediction_output, args.detected_faces_output, device)
+    predidct_age_gender_race(args.output_csv, args.detected_faces_output, device)
 
 
 if __name__ == "__main__":
