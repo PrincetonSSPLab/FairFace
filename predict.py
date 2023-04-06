@@ -649,7 +649,7 @@ def setup_args():
         help="path to the output directory where the detected faces will be saved",
     )
     parser.add_argument(
-        "--prediction_output",
+        "--output_csv",
         type=str,
         required=True,
         help="path to the output csv where the predictions will be saved",
