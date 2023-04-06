@@ -607,7 +607,6 @@ def setup_logger(name, log_file, console_level=logging.INFO, file_level=logging.
     """
     logging.basicConfig(level=logging.DEBUG)
     logger = logging.getLogger(name)
-    logger.setLevel(logging.INFO)
 
     formatter = logging.Formatter(
         "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
