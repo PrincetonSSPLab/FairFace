@@ -169,17 +169,22 @@ def save_face_chips(images, image_path, detected_images_output_dir):
 
     Returns
     -------
-    None
+    image_chip_;aths : list of str
+        A list of file paths of the saved face chips.
     """
+    image_chip_paths = []
     for idx, image in enumerate(images):
         img_name = image_path.split("/")[-1]
         path_sp = img_name.split(".")
+        output_path = path_sp[0] + "_" + "face" + str(idx) + "." + path_sp[-1]
         face_name = os.path.join(
             detected_images_output_dir,
-            path_sp[0] + "_" + "face" + str(idx) + "." + path_sp[-1],
+            output_path,
         )
         dlib.save_image(image, face_name)
-
+        image_chip_paths.append(face_name)
+    
+    return image_chip_paths
 
 def detect_face(
     image_paths,
@@ -209,17 +214,24 @@ def detect_face(
 
     Returns
     -------
-    None
+    image_path_to_chips : dict
+        A dictionary mapping image file paths to the file paths of the saved face chips.
     """
     logger = logging.getLogger(__name__)
     cnn_face_detector, sp = load_dlib_models()
 
+    image_path_to_chips = {}
     for index, image_path in enumerate(image_paths):
         logger.info(
             f"Processing image {index + 1} of {len(image_paths)}: '{image_path}'"
         )
-
-        img = dlib.load_rgb_image(image_path)
+        try:
+            img = dlib.load_rgb_image(image_path)
+        except RuntimeError:
+            logger.info(
+                "Sorry, there was an error loading '{}'".format(image_path)
+            )
+            continue
         img = resize_image(img, default_max_size)
         faces = find_faces_in_image(img, cnn_face_detector, sp)
 
@@ -228,7 +240,12 @@ def detect_face(
             continue
 
         images = dlib.get_face_chips(img, faces, size=size, padding=padding)
-        save_face_chips(images, image_path, detected_images_output_dir)
+        image_chip_paths = save_face_chips(images, image_path, detected_images_output_dir)
+        image_path_to_chips[image_path] = image_chip_paths
+    
+    return image_path_to_chips
+
+
 
 
 def load_models(device):
@@ -654,7 +671,13 @@ def setup_args():
         help="path to the output csv where the predictions will be saved",
     )
     parser.add_argument(
-        "--no-cuda", action="store_true", default=False, help="disables CUDA"
+        "--output_chip_map_csv",
+        type=str,
+        required=True,
+        help="path to the output csv where the chip map will be saved",
+    )
+    parser.add_argument(
+        "--no_cuda", action="store_true", default=False, help="disables CUDA"
     )
 
     return parser
@@ -682,7 +705,12 @@ def main():
 
     # Read the CSV containing image paths and extract the 'img_path' column.
     imgs = pd.read_csv(args.input_csv)["img_path"]
-    detect_face(imgs, args.detected_faces_output)
+    images_to_image_chip_map = detect_face(imgs, args.detected_faces_output)
+
+    images_to_image_chip_map_dataframe = pd.DataFrame.from_dict(images_to_image_chip_map, orient='index').reset_index()     
+    images_to_image_chip_map_dataframe.columns = ['face_name_align', 'face_name_chip']
+    images_to_image_chip_map_dataframe.to_csv(args.output_chip_map_csv, index=False)
+    logger.info("saved images_to_image_chip_map_dataframe at %s" % args.output_chip_map_csv)
 
     logger.info("detected faces are saved at %s" % args.detected_faces_output)
     predidct_age_gender_race(args.output_csv, args.detected_faces_output, device)

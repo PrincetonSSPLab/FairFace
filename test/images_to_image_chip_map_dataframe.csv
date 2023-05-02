@@ -1,0 +1,6 @@
+face_name_align,face_name_chip
+test/inputs/race_Asian.jpg,/scratch/gpfs/eh0560/FairFace/test/detected_faces/race_Asian_face0.jpg
+test/inputs/race_Black.jpg,/scratch/gpfs/eh0560/FairFace/test/detected_faces/race_Black_face0.jpg
+test/inputs/race_Latino.jpg,/scratch/gpfs/eh0560/FairFace/test/detected_faces/race_Latino_face0.jpg
+test/inputs/race_Middle_Eastern.jpg,/scratch/gpfs/eh0560/FairFace/test/detected_faces/race_Middle_Eastern_face0.jpg
+test/inputs/race_White.jpg,/scratch/gpfs/eh0560/FairFace/test/detected_faces/race_White_face0.jpg
